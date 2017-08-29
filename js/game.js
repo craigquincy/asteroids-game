@@ -1,6 +1,8 @@
 var gameProperties = {
   screenWidth: 640,
-  screenHeight: 480
+  screenHeight: 480,
+
+  delayToStartLevel: 3
 };
 
 var states = {
@@ -31,6 +33,21 @@ var graphicAssets = {
   }
 };
 
+var soundAssets = {
+  fire: {
+    URL: [
+      'assets/fire.m4a', 'assets/fire.ogg'
+    ],
+    name: 'fire'
+  },
+  destroyed: {
+    URL: [
+      'assets/destroyed.m4a', 'assets/destroyed.ogg'
+    ],
+    name: 'destroyed'
+  }
+};
+
 var shipProperties = {
   startX: gameProperties.screenWidth * 0.5,
   startY: gameProperties.screenHeight * 0.5,
@@ -39,7 +56,8 @@ var shipProperties = {
   maxVelocity: 300,
   angularVelocity: 200,
   startingLives: 3,
-  timeToReset: 3
+  timeToReset: 3,
+    blinkDelay: 0.2,
 };
 
 var bulletProperties = {
@@ -105,6 +123,14 @@ var gameState = function(game) {
 
   this.shipLives = shipProperties.startingLives;
   this.tf_lives;
+
+  this.score = 0;
+  this.tf_score;
+
+  this.sndDestroyed;
+  this.sndFire;
+
+  this.shipIsInvulnerable;
 };
 
 gameState.prototype = {
@@ -116,12 +142,16 @@ gameState.prototype = {
 
     game.load.image(graphicAssets.bullet.name, graphicAssets.bullet.URL);
     game.load.image(graphicAssets.ship.name, graphicAssets.ship.URL);
+
+    game.load.audio(soundAssets.destroyed.name, soundAssets.destroyed.URL);
+    game.load.audio(soundAssets.fire.name, soundAssets.fire.URL);
   },
 
   create: function() {
     this.initGraphics()
     this.initPhysics()
     this.initKeyboard()
+    this.initSounds()
     this.resetAsteroids();
 
   },
@@ -133,6 +163,10 @@ gameState.prototype = {
     this.asteroidGroup.forEachExists(this.checkBoundaries, this);
     game.physics.arcade.overlap(this.bulletGroup, this.asteroidGroup, this.asteroidCollision, null, this);
     game.physics.arcade.overlap(this.shipSprite, this.asteroidGroup, this.asteroidCollision, null, this);
+
+    if (!this.shipIsInvulnerable) {
+    game.physics.arcade.overlap(this.shipSprite, this.asteroidGroup, this.asteroidCollision, null, this);
+}
   },
 
   initGraphics: function() {
@@ -144,6 +178,16 @@ gameState.prototype = {
 
     this.tf_lives = game.add.text(20, 10, shipProperties.startingLives, fontAssets.counterFontStyle);
 
+    this.tf_lives = game.add.text(20, 10, shipProperties.startingLives, fontAssets.counterFontStyle);
+
+    this.tf_score = game.add.text(gameProperties.screenWidth - 20, 10, "0", fontAssets.counterFontStyle);
+    this.tf_score.align = 'right';
+    this.tf_score.anchor.set(1, 0);
+  },
+
+  initSounds: function() {
+    this.sndDestroyed = game.add.audio(soundAssets.destroyed.name);
+    this.sndFire = game.add.audio(soundAssets.fire.name);
   },
 
   initPhysics: function() {
@@ -211,6 +255,7 @@ gameState.prototype = {
 
   fire: function() {
     if (game.time.now > this.bulletInterval) {
+      this.sndFire.play();
       var bullet = this.bulletGroup.getFirstExists(false);
 
       if (bullet) {
@@ -264,6 +309,9 @@ gameState.prototype = {
   },
 
   asteroidCollision: function(target, asteroid) {
+
+    this.sndDestroyed.play();
+
     target.kill();
     asteroid.kill();
 
@@ -272,6 +320,12 @@ gameState.prototype = {
     }
 
     this.splitAsteroid(asteroid);
+    this.updateScore(asteroidProperties[asteroid.key].score);
+
+    if (!this.asteroidGroup.countLiving()) {
+      game.time.events.add(Phaser.Timer.SECOND * gameProperties.delayToStartLevel, this.nextLevel, this);
+    }
+
   },
 
   destroyShip: function() {
@@ -284,14 +338,44 @@ gameState.prototype = {
   },
 
   resetShip: function() {
+    this.shipIsInvulnerable = true;
+
     this.shipSprite.reset(shipProperties.startX, shipProperties.startY);
     this.shipSprite.angle = -90;
+
+    game.time.events.add(Phaser.Timer.SECOND * shipProperties.timeToReset, this.shipReady, this);
+
+    game.time.events.repeat(Phaser.Timer.SECOND * shipProperties.blinkDelay, shipProperties.timeToReset / shipProperties.blinkDelay, this.shipBlink, this);
+
+
   },
+
+  shipReady: function () {
+      this.shipIsInvulnerable = false;
+  },
+
+  shipBlink: function () {
+    this.shipSprite.visible = !this.shipSprite.visible;
+},
 
   splitAsteroid: function(asteroid) {
     if (asteroidProperties[asteroid.key].nextSize) {
       this.createAsteroid(asteroid.x, asteroid.y, asteroidProperties[asteroid.key].nextSize, asteroidProperties[asteroid.key].pieces);
     }
+  },
+
+  updateScore: function(score) {
+    this.score += score;
+    this.tf_score.text = this.score;
+  },
+  nextLevel: function() {
+    this.asteroidGroup.removeAll(true);
+
+    if (this.asteroidsCount < asteroidProperties.maxAsteroids) {
+      this.asteroidsCount += asteroidProperties.incrementAsteroids;
+    }
+
+    this.resetAsteroids();
   }
 };
 

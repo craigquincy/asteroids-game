@@ -1,15 +1,15 @@
-var gameProperties = {
+const gameProperties = {
   screenWidth: 640,
   screenHeight: 480,
 
   delayToStartLevel: 3
 };
 
-var states = {
+const states = {
   game: "game"
 };
 
-var graphicAssets = {
+const graphicAssets = {
   ship: {
     URL: 'assets/ship.png',
     name: 'ship'
@@ -33,7 +33,7 @@ var graphicAssets = {
   }
 };
 
-var soundAssets = {
+const soundAssets = {
   fire: {
     URL: [
       'assets/fire.m4a', 'assets/fire.ogg'
@@ -48,7 +48,7 @@ var soundAssets = {
   }
 };
 
-var shipProperties = {
+const shipProperties = {
   startX: gameProperties.screenWidth * 0.5,
   startY: gameProperties.screenHeight * 0.5,
   acceleration: 300,
@@ -57,17 +57,17 @@ var shipProperties = {
   angularVelocity: 200,
   startingLives: 3,
   timeToReset: 3,
-    blinkDelay: 0.2,
+  blinkDelay: 0.2
 };
 
-var bulletProperties = {
+const bulletProperties = {
   speed: 400,
   interval: 250,
   lifespan: 2000,
   maxCount: 30
 }
 
-var asteroidProperties = {
+const asteroidProperties = {
   startingAsteroids: 4,
   maxAsteroids: 20,
   incrementAsteroids: 2,
@@ -99,7 +99,7 @@ var asteroidProperties = {
   }
 };
 
-var fontAssets = {
+const fontAssets = {
   counterFontStyle: {
     font: '20px Arial',
     fill: '#FFFFFF',
@@ -107,35 +107,36 @@ var fontAssets = {
   }
 };
 
-var gameState = function(game) {
-  this.shipSprite
+class GameState {
 
-  this.key_left;
-  this.key_right;
-  this.key_thrust;
-  this.key_fire;
+  constructor() {
+    this.shipSprite
 
-  this.bulletGroup;
-  this.bulletInterval = 0;
+    this.key_left;
+    this.key_right;
+    this.key_thrust;
+    this.key_fire;
 
-  this.asteroidGroup;
-  this.asteroidsCount = asteroidProperties.startingAsteroids;
+    this.bulletGroup;
+    this.bulletInterval = 0;
 
-  this.shipLives = shipProperties.startingLives;
-  this.tf_lives;
+    this.asteroidGroup;
+    this.asteroidsCount = asteroidProperties.startingAsteroids;
 
-  this.score = 0;
-  this.tf_score;
+    this.shipLives = shipProperties.startingLives;
+    this.tf_lives;
 
-  this.sndDestroyed;
-  this.sndFire;
+    this.score = 0;
+    this.tf_score;
 
-  this.shipIsInvulnerable;
-};
+    this.sndDestroyed;
+    this.sndFire;
 
-gameState.prototype = {
+    this.shipIsInvulnerable;
 
-  preload: function() {
+  }
+
+  preload() {
     game.load.image(graphicAssets.asteroidLarge.name, graphicAssets.asteroidLarge.URL);
     game.load.image(graphicAssets.asteroidMedium.name, graphicAssets.asteroidMedium.URL);
     game.load.image(graphicAssets.asteroidSmall.name, graphicAssets.asteroidSmall.URL);
@@ -145,18 +146,18 @@ gameState.prototype = {
 
     game.load.audio(soundAssets.destroyed.name, soundAssets.destroyed.URL);
     game.load.audio(soundAssets.fire.name, soundAssets.fire.URL);
-  },
+  }
 
-  create: function() {
+  create() {
     this.initGraphics()
     this.initPhysics()
     this.initKeyboard()
     this.initSounds()
     this.resetAsteroids();
 
-  },
+  }
 
-  update: function() {
+  update() {
     this.checkPlayerInput()
     this.checkBoundaries(this.shipSprite);
     this.bulletGroup.forEachExists(this.checkBoundaries, this);
@@ -165,11 +166,11 @@ gameState.prototype = {
     game.physics.arcade.overlap(this.shipSprite, this.asteroidGroup, this.asteroidCollision, null, this);
 
     if (!this.shipIsInvulnerable) {
-    game.physics.arcade.overlap(this.shipSprite, this.asteroidGroup, this.asteroidCollision, null, this);
-}
-  },
+      game.physics.arcade.overlap(this.shipSprite, this.asteroidGroup, this.asteroidCollision, null, this);
+    }
+  }
 
-  initGraphics: function() {
+  initGraphics() {
     this.shipSprite = game.add.sprite(shipProperties.startX, shipProperties.startY, graphicAssets.ship.name);
     this.shipSprite.angle = -90;
     this.shipSprite.anchor.set(0.5, 0.5);
@@ -183,14 +184,14 @@ gameState.prototype = {
     this.tf_score = game.add.text(gameProperties.screenWidth - 20, 10, "0", fontAssets.counterFontStyle);
     this.tf_score.align = 'right';
     this.tf_score.anchor.set(1, 0);
-  },
+  }
 
-  initSounds: function() {
+  initSounds() {
     this.sndDestroyed = game.add.audio(soundAssets.destroyed.name);
     this.sndFire = game.add.audio(soundAssets.fire.name);
-  },
+  }
 
-  initPhysics: function() {
+  initPhysics() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     game.physics.enable(this.shipSprite, Phaser.Physics.ARCADE);
@@ -206,17 +207,17 @@ gameState.prototype = {
 
     this.asteroidGroup.enableBody = true;
     this.asteroidGroup.physicsBodyType = Phaser.Physics.ARCADE;
-  },
+  }
 
-  initKeyboard: function() {
+  initKeyboard() {
     this.key_left = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     this.key_right = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
     this.key_thrust = game.input.keyboard.addKey(Phaser.Keyboard.UP);
     this.key_fire = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-  },
+  }
 
-  checkPlayerInput: function() {
+  checkPlayerInput() {
     // rotate
     if (this.key_left.isDown) {
       this.shipSprite.body.angularVelocity = -shipProperties.angularVelocity;
@@ -237,9 +238,9 @@ gameState.prototype = {
     if (this.key_fire.isDown) {
       this.fire();
     }
-  },
+  }
 
-  checkBoundaries: function(sprite) {
+  checkBoundaries(sprite) {
     if (sprite.x < 0) {
       sprite.x = game.width;
     } else if (sprite.x > game.width) {
@@ -251,17 +252,17 @@ gameState.prototype = {
     } else if (sprite.y > game.height) {
       sprite.y = 0;
     }
-  },
+  }
 
-  fire: function() {
+  fire() {
     if (game.time.now > this.bulletInterval) {
       this.sndFire.play();
-      var bullet = this.bulletGroup.getFirstExists(false);
+      let bullet = this.bulletGroup.getFirstExists(false);
 
       if (bullet) {
-        var length = this.shipSprite.width * 0.5;
-        var x = this.shipSprite.x + (Math.cos(this.shipSprite.rotation) * length);
-        var y = this.shipSprite.y + (Math.sin(this.shipSprite.rotation) * length);
+        let length = this.shipSprite.width * 0.5;
+        let x = this.shipSprite.x + (Math.cos(this.shipSprite.rotation) * length);
+        let y = this.shipSprite.y + (Math.sin(this.shipSprite.rotation) * length);
 
         bullet.reset(x, y);
         bullet.lifespan = bulletProperties.lifespan;
@@ -271,30 +272,30 @@ gameState.prototype = {
         this.bulletInterval = game.time.now + bulletProperties.interval;
       }
     }
-  },
+  }
 
-  createAsteroid: function(x, y, size, pieces) {
+  createAsteroid(x, y, size, pieces) {
     if (pieces === undefined) {
       pieces = 1;
     }
 
-    for (var i = 0; i < pieces; i++) {
-      var asteroid = this.asteroidGroup.create(x, y, size);
+    for (let i = 0; i < pieces; i++) {
+      let asteroid = this.asteroidGroup.create(x, y, size);
       asteroid.anchor.set(0.5, 0.5);
       asteroid.body.angularVelocity = game.rnd.integerInRange(asteroidProperties[size].minAngularVelocity, asteroidProperties[size].maxAngularVelocity);
 
-      var randomAngle = game.math.degToRad(game.rnd.angle());
-      var randomVelocity = game.rnd.integerInRange(asteroidProperties[size].minVelocity, asteroidProperties[size].maxVelocity);
+      let randomAngle = game.math.degToRad(game.rnd.angle());
+      let randomVelocity = game.rnd.integerInRange(asteroidProperties[size].minVelocity, asteroidProperties[size].maxVelocity);
 
       game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, asteroid.body.velocity);
     }
-  },
+  }
 
-  resetAsteroids: function() {
-    for (var i = 0; i < this.asteroidsCount; i++) {
-      var side = Math.round(Math.random());
-      var x;
-      var y;
+  resetAsteroids() {
+    for (let i = 0; i < this.asteroidsCount; i++) {
+      let side = Math.round(Math.random());
+      let x;
+      let y;
 
       if (side) {
         x = Math.round(Math.random()) * gameProperties.screenWidth;
@@ -306,9 +307,9 @@ gameState.prototype = {
 
       this.createAsteroid(x, y, graphicAssets.asteroidLarge.name);
     }
-  },
+  }
 
-  asteroidCollision: function(target, asteroid) {
+  asteroidCollision(target, asteroid) {
 
     this.sndDestroyed.play();
 
@@ -326,18 +327,18 @@ gameState.prototype = {
       game.time.events.add(Phaser.Timer.SECOND * gameProperties.delayToStartLevel, this.nextLevel, this);
     }
 
-  },
+  }
 
-  destroyShip: function() {
+  destroyShip() {
     this.shipLives--;
     this.tf_lives.text = this.shipLives;
 
     if (this.shipLives) {
       game.time.events.add(Phaser.Timer.SECOND * shipProperties.timeToReset, this.resetShip, this);
     }
-  },
+  }
 
-  resetShip: function() {
+  resetShip() {
     this.shipIsInvulnerable = true;
 
     this.shipSprite.reset(shipProperties.startX, shipProperties.startY);
@@ -347,28 +348,28 @@ gameState.prototype = {
 
     game.time.events.repeat(Phaser.Timer.SECOND * shipProperties.blinkDelay, shipProperties.timeToReset / shipProperties.blinkDelay, this.shipBlink, this);
 
+  }
 
-  },
+  shipReady() {
+    this.shipIsInvulnerable = false;
+  }
 
-  shipReady: function () {
-      this.shipIsInvulnerable = false;
-  },
-
-  shipBlink: function () {
+  shipBlink() {
     this.shipSprite.visible = !this.shipSprite.visible;
-},
+  }
 
-  splitAsteroid: function(asteroid) {
+  splitAsteroid(asteroid) {
     if (asteroidProperties[asteroid.key].nextSize) {
       this.createAsteroid(asteroid.x, asteroid.y, asteroidProperties[asteroid.key].nextSize, asteroidProperties[asteroid.key].pieces);
     }
-  },
+  }
 
-  updateScore: function(score) {
+  updateScore(score) {
     this.score += score;
     this.tf_score.text = this.score;
-  },
-  nextLevel: function() {
+  }
+
+  nextLevel() {
     this.asteroidGroup.removeAll(true);
 
     if (this.asteroidsCount < asteroidProperties.maxAsteroids) {
@@ -377,8 +378,8 @@ gameState.prototype = {
 
     this.resetAsteroids();
   }
-};
+}
 
-var game = new Phaser.Game(gameProperties.screenWidth, gameProperties.screenHeight, Phaser.AUTO, 'gameDiv');
-game.state.add(states.game, gameState);
+let game = new Phaser.Game(gameProperties.screenWidth, gameProperties.screenHeight, Phaser.AUTO, 'gameDiv');
+game.state.add(states.game, new GameState());
 game.state.start(states.game);

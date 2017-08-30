@@ -108,7 +108,6 @@ const fontAssets = {
 };
 
 class GameState {
-
   constructor() {
     this.shipSprite;
 
@@ -149,9 +148,9 @@ class GameState {
 
   create() {
     this.initGraphics()
+    this.initSounds()
     this.initPhysics()
     this.initKeyboard()
-    this.initSounds()
     this.resetAsteroids();
   }
 
@@ -174,8 +173,6 @@ class GameState {
     this.shipSprite.anchor.set(0.5, 0.5);
     this.bulletGroup = game.add.group();
     this.asteroidGroup = game.add.group();
-
-    this.tf_lives = game.add.text(20, 10, shipProperties.startingLives, fontAssets.counterFontStyle);
 
     this.tf_lives = game.add.text(20, 10, shipProperties.startingLives, fontAssets.counterFontStyle);
 
@@ -346,6 +343,7 @@ class GameState {
 
   shipReady() {
     this.shipIsInvulnerable = false;
+    this.shipSprite.visible = true;
   }
 
   shipBlink() {

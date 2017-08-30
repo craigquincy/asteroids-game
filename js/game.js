@@ -110,7 +110,7 @@ const fontAssets = {
 class GameState {
 
   constructor() {
-    this.shipSprite
+    this.shipSprite;
 
     this.key_left;
     this.key_right;
@@ -133,7 +133,6 @@ class GameState {
     this.sndFire;
 
     this.shipIsInvulnerable;
-
   }
 
   preload() {
@@ -154,7 +153,6 @@ class GameState {
     this.initKeyboard()
     this.initSounds()
     this.resetAsteroids();
-
   }
 
   update() {
@@ -214,7 +212,6 @@ class GameState {
     this.key_right = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
     this.key_thrust = game.input.keyboard.addKey(Phaser.Keyboard.UP);
     this.key_fire = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
   }
 
   checkPlayerInput() {
@@ -310,13 +307,12 @@ class GameState {
   }
 
   asteroidCollision(target, asteroid) {
-
     this.sndDestroyed.play();
 
     target.kill();
     asteroid.kill();
 
-    if (target.key == graphicAssets.ship.name) {
+    if (target.key === graphicAssets.ship.name) {
       this.destroyShip();
     }
 
@@ -326,7 +322,6 @@ class GameState {
     if (!this.asteroidGroup.countLiving()) {
       game.time.events.add(Phaser.Timer.SECOND * gameProperties.delayToStartLevel, this.nextLevel, this);
     }
-
   }
 
   destroyShip() {
@@ -347,7 +342,6 @@ class GameState {
     game.time.events.add(Phaser.Timer.SECOND * shipProperties.timeToReset, this.shipReady, this);
 
     game.time.events.repeat(Phaser.Timer.SECOND * shipProperties.blinkDelay, shipProperties.timeToReset / shipProperties.blinkDelay, this.shipBlink, this);
-
   }
 
   shipReady() {
